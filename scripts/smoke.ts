@@ -29,6 +29,7 @@ async function journey(app_id: string, gstin: string, city: string, contact: str
   const needs = { segment, employees: 25, sites: 3, priority: "reliability", wants };
   const r = await call("POST", "/recommend", needs);
   console.log("recommend:", r.status, r.json.recommendation?.bundle, "unmet:", r.json.recommendation?.unmet.map((u: any) => u.want), "₹/mo incl GST:", r.json.quote?.monthlyInclGst);
+  console.log("summary:", r.json.recommendation?.summarySource, r.json.recommendation?.summary ?? "");
   const addOn = r.json.addOns?.[0];
   if (addOn) {
     const t = await call("POST", "/quote", { needs, bundle: { ...r.json.recommendation.bundle, [addOn.id]: addOn.defaultQuantity } });
