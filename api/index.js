@@ -47343,15 +47343,18 @@ function keywordNeeds(text) {
 }
 var toAsciiDigits = (s) => s.replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 2406));
 var numbersIn = (s) => toAsciiDigits(s).match(/\d+(?:[.,]\d+)*/g) ?? [];
-async function phraseExplanation(lang2, bullets, needs) {
-  const sys = `Rewrite the bullet points as 2-3 short, warm sentences for a small business owner, in ${lang2 === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
-Do not add any product, feature, number, price or promise that is not in the bullets. Copy any number exactly as written in the bullets; never calculate or introduce new numbers.`;
-  const out = await chat(sys, `Business: ${needs.businessType ?? needs.segment}
-- ${bullets.join("\n- ")}`, false);
-  if (!out || out.length > 600 || /P\d\d/.test(out)) return null;
-  const allowed = new Set(numbersIn(bullets.join(" ")));
-  if (numbersIn(out).some((n) => !allowed.has(n))) return null;
-  if (out.includes("\u20B9") && !bullets.some((b) => b.includes("\u20B9"))) return null;
+async function phraseExplanation(lang2, lines, needs) {
+  const sys = `Summarise this plan in 2-3 short, warm sentences of plain prose (no markdown, no lists) for a small business owner, in ${lang2 === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
+Refer to products by their exact names. Use each quantity exactly as given; do not say "each location" or "every site" unless the reason says one per location.
+Never mention prices or money. Do not add any product, feature, number or promise that is not in the plan.`;
+  const raw2 = await chat(sys, `Business: ${needs.businessType ?? needs.segment}
+Plan:
+${lines.map((l) => `- ${l.name} | quantity ${l.quantity} | ${l.reasons}`).join("\n")}`, false);
+  const out = raw2?.replace(/[\u00A0\u2007\u202F]/g, " ").replace(/[\u2010\u2011]/g, "-");
+  if (!out || out.length > 600 || /P\d\d|₹|\bRs\.?\s|रुपये|[*#|]/i.test(out)) return null;
+  const allowed = /* @__PURE__ */ new Set([...lines.map((l) => String(l.quantity)), ...lines.flatMap((l) => numbersIn(l.reasons))]);
+  const withoutNames = lines.reduce((s, l) => s.split(l.name).join(" "), out);
+  if (numbersIn(withoutNames).some((n) => !allowed.has(n))) return null;
   return out.trim();
 }
 
@@ -47588,8 +47591,8 @@ app.post("/recommend", async (c) => {
   await store.saveAdvisor({ sessionId: s, needs, recommendation: rec, mode: llmConfigured() ? "llm" : "structured", at: (/* @__PURE__ */ new Date()).toISOString() });
   const items = rec.items.map((i) => ({ ...i, name: product(i.productId).name, reasonsText: i.reasons.map((r) => t(r, l)) }));
   const unmet = rec.unmet.map((u) => ({ ...u, reasonsText: [...new Set(u.failures.map((f) => explainFailure(f, l)))] }));
-  const bullets = items.map((i) => `${i.name}: ${i.reasonsText.join(" ")}`);
-  const summary = bullets.length ? await phraseExplanation(l, bullets, needs) ?? null : null;
+  const lines = items.map((i) => ({ name: i.name, quantity: i.quantity, reasons: i.reasonsText.join(" ") }));
+  const summary = lines.length ? await phraseExplanation(l, lines, needs) ?? null : null;
   return c.json({
     recommendation: { ...rec, items, unmet, notesText: rec.notes.map((n) => t(n, l)), summary, summarySource: summary ? "llm" : "template" },
     addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: describe3(id, l), defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),

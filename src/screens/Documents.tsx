@@ -32,7 +32,7 @@ export function Documents() {
     }).catch(() => setConsented(false));
     // After a reload, show documents already uploaded in this session instead of empty slots.
     api("GET", "/kyc").then((k: any) => {
-      setDocs(Object.fromEntries(k.docs.map((d: any) => [d.docType, { state: "read", name: DOC_LABEL[d.docType]?.[lang] }])));
+      setDocs(Object.fromEntries(k.docs.map((d: any) => [d.docType, { state: "read" }])));
     }).catch(() => {});
   }, []);
 
@@ -161,7 +161,7 @@ function Slot({ docType, label, state, onFile, findings }: { docType: string; la
         <div className="min-w-0">
           <p className="font-semibold">{label}</p>
           <p className="text-sm text-ink-soft truncate">
-            {s === "reading" ? tr("reading", lang) : s === "read" ? `${tr("read", lang)} · ${state?.name}` : s === "error" ? state?.name : ""}
+            {s === "reading" ? tr("reading", lang) : s === "read" ? [tr("read", lang), state?.name].filter(Boolean).join(" · ") : s === "error" ? state?.name : ""}
           </p>
         </div>
         <input ref={ref} type="file" accept="image/png,image/jpeg,application/pdf" capture="environment" className="sr-only" id={`f-${docType}`} onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />

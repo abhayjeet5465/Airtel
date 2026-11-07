@@ -34,6 +34,8 @@ export function Business() {
       const r = await api("POST", "/registry/gstin", { gstin });
       setRecord(r.record);
       setBusinessName(r.record.tradeName);
+      const proprietor = /^(.+?)\s*\(Prop\./i.exec(r.record.legalName ?? "")?.[1];
+      if (proprietor) setContactName((c) => c || proprietor);
       setCity(cityFromAddress(r.record.address, cities));
       setGstin(r.record.gstin);
     } catch (e) {

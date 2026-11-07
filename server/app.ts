@@ -208,8 +208,8 @@ app.post("/recommend", async (c) => {
   const items = rec.items.map((i) => ({ ...i, name: product(i.productId).name, reasonsText: i.reasons.map((r) => t(r, l)) }));
   const unmet = rec.unmet.map((u) => ({ ...u, reasonsText: [...new Set(u.failures.map((f) => explainFailure(f, l)))] }));
   // Exclusions and notes are shown verbatim on the plan screen; the summary covers only what is in the plan.
-  const bullets = items.map((i) => `${i.name}: ${i.reasonsText.join(" ")}`);
-  const summary = bullets.length ? (await phraseExplanation(l, bullets, needs)) ?? null : null;
+  const lines = items.map((i) => ({ name: i.name, quantity: i.quantity, reasons: i.reasonsText.join(" ") }));
+  const summary = lines.length ? (await phraseExplanation(l, lines, needs)) ?? null : null;
   return c.json({
     recommendation: { ...rec, items, unmet, notesText: rec.notes.map((n) => t(n, l)), summary, summarySource: summary ? "llm" : "template" },
     addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: describe(id, l), defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),

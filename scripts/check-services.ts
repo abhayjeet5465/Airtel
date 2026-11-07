@@ -17,8 +17,15 @@ console.log("Groq models:", ids.join(", "));
 const t0 = Date.now();
 const r = await extractNeeds("Hamari 2 dukan hai, 8 log kaam karte hain. UPI billing aur 4 CCTV camera chahiye, WhatsApp pe customers se baat karte hain.");
 console.log(`LLM extract (${Date.now() - t0} ms):`, r.mode, JSON.stringify(r.parsed));
-const s = await phraseExplanation("hi", ["Biz Fibre 100: steady wired internet for UPI, billing and calls.", "Cloud CCTV: You asked for this."], { segment: "micro", cityTier: 2, employees: 8, sites: 2, wants: {} });
-console.log("LLM explain:", s ?? "(rejected or unavailable -> template)");
+const plan = [
+  { name: "Biz Fibre 300", quantity: 3, reasons: "Fibre 300 Mbps: enough speed for a larger team or several sites. One per location." },
+  { name: "Cloud CCTV", quantity: 6, reasons: "You asked for this. Priced per camera." },
+  { name: "Business Postpaid 299", quantity: 3, reasons: "You asked for this. Priced per phone line." },
+];
+for (const lang of ["en", "hi"] as const) {
+  const s = await phraseExplanation(lang, plan, { businessType: "electronics shop", segment: "multi", cityTier: 2, employees: 12, sites: 3, wants: {} });
+  console.log(`LLM explain (${lang}):`, s ?? "(rejected or unavailable -> template)");
+}
 
 const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (url && key) {

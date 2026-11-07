@@ -133,15 +133,21 @@ export function keywordNeeds(text: string): ParsedNeeds {
 const toAsciiDigits = (s: string) => s.replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 0x0966));
 const numbersIn = (s: string) => toAsciiDigits(s).match(/\d+(?:[.,]\d+)*/g) ?? [];
 
-/** Optional plain-language summary. Rejected (-> template) if it contains a product code or any number that is
- *  not already in the engine's bullets: prices and quantities must only ever come from the deterministic engine. */
-export async function phraseExplanation(lang: Lang, bullets: string[], needs: Needs): Promise<string | null> {
-  const sys = `Rewrite the bullet points as 2-3 short, warm sentences for a small business owner, in ${lang === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
-Do not add any product, feature, number, price or promise that is not in the bullets. Copy any number exactly as written in the bullets; never calculate or introduce new numbers.`;
-  const out = await chat(sys, `Business: ${needs.businessType ?? needs.segment}\n- ${bullets.join("\n- ")}`, false);
-  if (!out || out.length > 600 || /P\d\d/.test(out)) return null;
-  const allowed = new Set(numbersIn(bullets.join(" ")));
-  if (numbersIn(out).some((n) => !allowed.has(n))) return null;
-  if (out.includes("₹") && !bullets.some((b) => b.includes("₹"))) return null;
+export interface PlanLine { name: string; quantity: number; reasons: string }
+
+/** Optional plain-language summary. Rejected (-> template) if it mentions money, a product code, or any number
+ *  other than the engine's quantities and reason texts. Numbers inside product names ("Postpaid 299") don't count,
+ *  so they can't be passed off as prices. */
+export async function phraseExplanation(lang: Lang, lines: PlanLine[], needs: Needs): Promise<string | null> {
+  const sys = `Summarise this plan in 2-3 short, warm sentences of plain prose (no markdown, no lists) for a small business owner, in ${lang === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
+Refer to products by their exact names. Use each quantity exactly as given; do not say "each location" or "every site" unless the reason says one per location.
+Never mention prices or money. Do not add any product, feature, number or promise that is not in the plan.`;
+  const raw = await chat(sys, `Business: ${needs.businessType ?? needs.segment}\nPlan:\n${lines.map((l) => `- ${l.name} | quantity ${l.quantity} | ${l.reasons}`).join("\n")}`, false);
+  // Models like non-breaking spaces/hyphens; normalise so product names match exactly.
+  const out = raw?.replace(/[\u00A0\u2007\u202F]/g, " ").replace(/[\u2010\u2011]/g, "-");
+  if (!out || out.length > 600 || /P\d\d|₹|\bRs\.?\s|रुपये|[*#|]/i.test(out)) return null;
+  const allowed = new Set([...lines.map((l) => String(l.quantity)), ...lines.flatMap((l) => numbersIn(l.reasons))]);
+  const withoutNames = lines.reduce((s, l) => s.split(l.name).join(" "), out);
+  if (numbersIn(withoutNames).some((n) => !allowed.has(n))) return null;
   return out.trim();
 }
