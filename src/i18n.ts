@@ -1,7 +1,8 @@
 import type { Lang } from "./api.ts";
 
 const S = {
-  brand: { en: "Accel Business", hi: "Accel Business" },
+  brand: { en: "Udyam Setu", hi: "उद्यम सेतु" },
+  byline: { en: "by Accel Business", hi: "Accel Business द्वारा" },
   switchLang: { en: "हिंदी", hi: "English" },
   steps: { en: ["Business", "Your needs", "Plan & price", "Documents", "Track"], hi: ["व्यवसाय", "ज़रूरतें", "प्लान और कीमत", "दस्तावेज़", "ट्रैक"] },
 

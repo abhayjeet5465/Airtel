@@ -27,9 +27,13 @@ export function App() {
   return (
     <div className={`mx-auto px-5 pb-16 ${backOffice || j.step === 2 ? "max-w-5xl" : "max-w-xl"}`}>
       <header className="flex items-center justify-between py-5">
-        <a href="#/" className="flex items-center gap-2 font-bold text-lg" aria-label="Accel Business home">
-          <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden><rect width="26" height="26" rx="6" fill="#1B2A4A" /><path d="M7 18 L13 7 L19 18" stroke="#E8A317" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" /><circle cx="13" cy="15.5" r="1.6" fill="#E8A317" /></svg>
-          {tr("brand", lang)}
+        <a href="#/" className="flex items-center gap-2" aria-label="Udyam Setu home">
+          {/* A bridge (setu) mark: one span linking two points. */}
+          <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden><rect width="28" height="28" rx="7" fill="#1B2A4A" /><path d="M5 19 Q14 6 23 19" stroke="#E8A317" strokeWidth="2.6" fill="none" strokeLinecap="round" /><path d="M5 19 H23" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" /></svg>
+          <span className="leading-tight">
+            <span className="block font-bold text-lg">{tr("brand", lang)}</span>
+            <span className="block text-xs text-ink-soft">{tr("byline", lang)}</span>
+          </span>
         </a>
         {!backOffice && (
           <button className="rounded-full border border-line bg-white px-3 py-1 text-sm font-semibold" onClick={() => setLang(lang === "en" ? "hi" : "en")}>{tr("switchLang", lang)}</button>
