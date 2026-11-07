@@ -32,6 +32,9 @@ function fromCsv(): Data {
 }
 
 async function fromSupabase(): Promise<Data> {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("no local dataset and SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not set");
+  }
   const { supabaseAdmin } = await import("./supabaseStore.ts");
   const db = supabaseAdmin();
   const all = async <T>(table: string, cols = "*"): Promise<T[]> => {
@@ -51,7 +54,12 @@ async function fromSupabase(): Promise<Data> {
 export async function loadDataset(): Promise<Data> {
   if (cache) return cache;
   loading ??= (async () => (cache = localDatasetAvailable() ? fromCsv() : await fromSupabase()))();
-  return loading;
+  try {
+    return await loading;
+  } catch (e) {
+    loading = null; // retry on the next request (e.g. once the migration has been run)
+    throw e;
+  }
 }
 
 /** Synchronous accessor for request handlers; loadDataset() runs as middleware first. Tests use local CSVs. */

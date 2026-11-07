@@ -26,7 +26,18 @@ const store: Store = useSupabase
   : new MemoryStore(process.env.VERCEL ? undefined : resolvePath(import.meta.dirname, "data/private/store.local.json"));
 
 export const app = new Hono().basePath("/api");
-app.use(async (_c, next) => { await loadDataset(); await next(); });
+// Reference data must load before any route can work; say exactly what is missing instead of a bare 500.
+let datasetError: string | null = null;
+app.use(async (c, next) => {
+  try {
+    await loadDataset();
+    datasetError = null;
+  } catch (e) {
+    datasetError = (e as Error).message;
+    if (!c.req.path.endsWith("/health")) return c.json({ error: "dataset_unavailable", detail: datasetError }, 503);
+  }
+  await next();
+});
 
 // ---------------------------------------------------------------- helpers
 const lang = (c: Context): Lang => (c.req.header("accept-language")?.startsWith("hi") ? "hi" : "en");
@@ -72,7 +83,11 @@ const publicGst = (r: ReturnType<typeof dataset>["gst"] extends Map<string, infe
 
 // ---------------------------------------------------------------- system
 app.get("/health", async (c) =>
-  c.json({ ok: true, store: store.mode, dataset: dataset().source, llm: llmConfigured() ? "configured" : "structured_fallback", ocr: (await ocrServiceUp()) ? "service" : "cached_specimens", kycReferenceDate: KYC_REFERENCE_DATE }),
+  c.json({
+    ok: !datasetError, store: store.mode, dataset: datasetError ? `unavailable: ${datasetError}` : dataset().source,
+    supabaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    llm: llmConfigured() ? "configured" : "structured_fallback", ocr: (await ocrServiceUp()) ? "service" : "cached_specimens", kycReferenceDate: KYC_REFERENCE_DATE,
+  }, datasetError ? 503 : 200),
 );
 app.post("/session", async (c) => c.json({ sessionId: await store.createSession() }));
 

@@ -24178,6 +24178,9 @@ function fromCsv() {
   };
 }
 async function fromSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("no local dataset and SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not set");
+  }
   const { supabaseAdmin: supabaseAdmin2 } = await Promise.resolve().then(() => (init_supabaseStore(), supabaseStore_exports));
   const db = supabaseAdmin2();
   const all = async (table, cols = "*") => {
@@ -24195,7 +24198,12 @@ async function fromSupabase() {
 async function loadDataset() {
   if (cache) return cache;
   loading ??= (async () => cache = localDatasetAvailable() ? fromCsv() : await fromSupabase())();
-  return loading;
+  try {
+    return await loading;
+  } catch (e) {
+    loading = null;
+    throw e;
+  }
 }
 function dataset() {
   if (!cache) {
@@ -47365,8 +47373,15 @@ var NOTICE_VERSION = "kyc-notice-v1";
 var useSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) && process.env.STORE !== "memory";
 var store = useSupabase ? new (await Promise.resolve().then(() => (init_supabaseStore(), supabaseStore_exports))).SupabaseStore() : new MemoryStore(process.env.VERCEL ? void 0 : resolvePath(import.meta.dirname, "data/private/store.local.json"));
 var app = new Hono3().basePath("/api");
-app.use(async (_c, next) => {
-  await loadDataset();
+var datasetError = null;
+app.use(async (c, next) => {
+  try {
+    await loadDataset();
+    datasetError = null;
+  } catch (e) {
+    datasetError = e.message;
+    if (!c.req.path.endsWith("/health")) return c.json({ error: "dataset_unavailable", detail: datasetError }, 503);
+  }
   await next();
 });
 var lang = (c) => c.req.header("accept-language")?.startsWith("hi") ? "hi" : "en";
@@ -47419,7 +47434,15 @@ var publicGst = (r) => ({
 });
 app.get(
   "/health",
-  async (c) => c.json({ ok: true, store: store.mode, dataset: dataset().source, llm: llmConfigured() ? "configured" : "structured_fallback", ocr: await ocrServiceUp() ? "service" : "cached_specimens", kycReferenceDate: KYC_REFERENCE_DATE })
+  async (c) => c.json({
+    ok: !datasetError,
+    store: store.mode,
+    dataset: datasetError ? `unavailable: ${datasetError}` : dataset().source,
+    supabaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    llm: llmConfigured() ? "configured" : "structured_fallback",
+    ocr: await ocrServiceUp() ? "service" : "cached_specimens",
+    kycReferenceDate: KYC_REFERENCE_DATE
+  }, datasetError ? 503 : 200)
 );
 app.post("/session", async (c) => c.json({ sessionId: await store.createSession() }));
 app.get(
