@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { WANTS } from "../i18n.ts";
 import { Button, Notice } from "../ui.tsx";
+
+const wantLabel = (k: string) => WANTS.find((w) => w.key === k)?.en ?? k;
 
 const KEY = "demo-backoffice";
 const bo = async (method: string, path: string, body?: unknown) => {
@@ -13,11 +16,13 @@ export function BackOffice() {
   const [orders, setOrders] = useState<any[]>([]);
   const [leads, setLeads] = useState<{ live: any[]; historical: any[] }>({ live: [], historical: [] });
   const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   const load = () =>
     Promise.all([bo("GET", "/kyc-queue"), bo("GET", "/orders"), bo("GET", "/leads")])
       .then(([q, o, l]) => { setQueue(q); setOrders(o); setLeads(l); setError(""); })
-      .catch((e) => setError(e.message));
+      .catch((e) => setError(e.message))
+      .finally(() => setLoaded(true));
   useEffect(() => { load(); }, []);
 
   const decide = async (id: string, decision: "PASS" | "REJECT") => { await bo("POST", `/kyc/${id}/decide`, { decision, note: `Reviewer ${decision.toLowerCase()} in back office` }); load(); };
@@ -33,7 +38,9 @@ export function BackOffice() {
         <Button kind="secondary" onClick={load}>Refresh</Button>
       </header>
       {error && <Notice tone="bad">{error}</Notice>}
+      {!loaded && <p className="text-ink-soft">Loading…</p>}
 
+      {loaded && <>
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">KYC cases needing a person ({queue.length})</h2>
         {queue.length === 0 && <p className="text-ink-soft">No open cases. Applications that pass checks never reach this list.</p>}
@@ -80,12 +87,13 @@ export function BackOffice() {
                 <td className="py-2">{l.business}<span className="block text-xs text-ink-soft">{l.source === "app" ? "This app" : `${l.leadId} · ${l.city}`}</span></td>
                 <td>{l.route === "assisted" ? "Assisted" : "Self-serve"}</td>
                 <td className="num" title={l.scoreReasons.join(", ")}>{l.score}</td>
-                <td>{l.source === "app" ? (l.unmet.length ? `Wanted ${l.unmet.join(", ")}` : "Did not order") : l.dropReason}</td>
+                <td>{l.source === "app" ? (l.unmet.length ? `Wanted: ${l.unmet.map(wantLabel).join(", ")}` : "Did not order") : l.dropReason}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      </>}
     </div>
   );
 }
