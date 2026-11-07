@@ -5,24 +5,28 @@ import { Hono, type Context } from "hono";
 import { z } from "zod";
 import { PRODUCTS, product } from "./core/catalogue.ts";
 import { t } from "./core/i18n.ts";
-import { assess, DOC_TYPES, KYC_ENGINE_VERSION, type Fields } from "./core/kyc.ts";
+import { assess, DOC_TYPES, KYC_ENGINE_VERSION, verdictOf, type Fields } from "./core/kyc.ts";
 import { leadScore, route } from "./core/leadScore.ts";
 import { quote } from "./core/pricing.ts";
 import { defaultQuantity, recommend, validateCustomBundle } from "./core/recommend.ts";
 import type { Bundle, DocType, GstStatus, KycFinding, Lang, Needs, Segment } from "./core/types.ts";
 import { maskId, normaliseGstinStructure, repairGstinOcr, validateGstin, validateUdyam } from "./core/validators.ts";
-import { dataset, SEGMENT_CODE } from "./data/dataset.ts";
+import { dataset, loadDataset, localDatasetAvailable, SEGMENT_CODE } from "./data/dataset.ts";
 import { MemoryStore, type OrderRecord, type OrderStatus, type Profile, type Store } from "./data/store.ts";
 import { extractNeeds, llmConfigured, phraseExplanation } from "./services/llm.ts";
 import { ocrServiceUp, readDocument, sha256 } from "./services/ocr.ts";
 
 export const KYC_REFERENCE_DATE = process.env.KYC_REFERENCE_DATE ?? "2026-07-15"; // README: use 2026-07-15 as "today"
 const NOTICE_VERSION = "kyc-notice-v1";
-// Local mode snapshots to a git-ignored file so a dev-server restart doesn't wipe a demo in progress.
-// Vercel's filesystem is read-only, so the hosted build keeps memory only (Supabase store replaces it there).
-const store: Store = new MemoryStore(process.env.VERCEL ? undefined : resolvePath(import.meta.dirname, "data/private/store.local.json"));
+// Supabase when configured; otherwise local memory, snapshotted to a git-ignored file so a dev-server restart
+// doesn't wipe a demo in progress. STORE=memory forces the local store (tests, offline demo).
+const useSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) && process.env.STORE !== "memory";
+const store: Store = useSupabase
+  ? new (await import("./data/supabaseStore.ts")).SupabaseStore()
+  : new MemoryStore(process.env.VERCEL ? undefined : resolvePath(import.meta.dirname, "data/private/store.local.json"));
 
 export const app = new Hono().basePath("/api");
+app.use(async (_c, next) => { await loadDataset(); await next(); });
 
 // ---------------------------------------------------------------- helpers
 const lang = (c: Context): Lang => (c.req.header("accept-language")?.startsWith("hi") ? "hi" : "en");
@@ -30,6 +34,7 @@ const lang = (c: Context): Lang => (c.req.header("accept-language")?.startsWith(
 async function session(c: Context): Promise<string> {
   const s = c.req.header("x-session-id");
   if (!s || !/^[0-9a-f-]{36}$/.test(s)) throw new HttpError(401, "missing_session");
+  if (!(await store.hasSession(s))) throw new HttpError(401, "unknown_session");
   return s;
 }
 
@@ -67,7 +72,7 @@ const publicGst = (r: ReturnType<typeof dataset>["gst"] extends Map<string, infe
 
 // ---------------------------------------------------------------- system
 app.get("/health", async (c) =>
-  c.json({ ok: true, store: store.mode, llm: llmConfigured() ? "configured" : "structured_fallback", ocr: (await ocrServiceUp()) ? "service" : "cached_specimens", kycReferenceDate: KYC_REFERENCE_DATE }),
+  c.json({ ok: true, store: store.mode, dataset: dataset().source, llm: llmConfigured() ? "configured" : "structured_fallback", ocr: (await ocrServiceUp()) ? "service" : "cached_specimens", kycReferenceDate: KYC_REFERENCE_DATE }),
 );
 app.post("/session", async (c) => c.json({ sessionId: await store.createSession() }));
 
@@ -247,7 +252,7 @@ app.post("/kyc/upload", async (c) => {
   const docType = z.enum(["gst_certificate", "udyam_certificate", "signatory_id", "address_proof"]).parse(form.doc_type);
   const file = form.file;
   if (!(file instanceof File)) throw new HttpError(400, "file_required");
-  if (file.size > 5 * 1024 * 1024) throw new HttpError(422, "file_too_large");
+  if (file.size > 4 * 1024 * 1024) throw new HttpError(422, "file_too_large"); // Vercel request limit is 4.5 MB
   const buf = Buffer.from(await file.arrayBuffer());
   const mime = MAGIC.find(([, sig]) => sig.every((b, i) => buf[i] === b))?.[0];
   if (!mime) throw new HttpError(422, "unsupported_file_type");
@@ -256,7 +261,9 @@ app.post("/kyc/upload", async (c) => {
   const keep = KEEP_FIELDS[docType];
   const fields = Object.fromEntries(Object.entries(ocr.fields).filter(([k]) => keep.includes(k)));
   if (fields.id_no) fields.id_no = maskId(fields.id_no);
-  const rec = await store.saveKycDoc({ sessionId: s, docType, sha256: sha256(buf), sizeBytes: buf.length, mimeType: mime, sharpness: ocr.sharpness, skew: ocr.skew, fields, source: ocr.source, retentionUntil: new Date(Date.now() + RETENTION_DAYS * 86_400_000).toISOString() });
+  // Supabase mode keeps the image in a private bucket so a reviewer can look at REVIEW cases; deleted at retention.
+  const storagePath = store.putDocumentImage ? await store.putDocumentImage(s, docType, buf, mime) : undefined;
+  const rec = await store.saveKycDoc({ sessionId: s, docType, sha256: sha256(buf), sizeBytes: buf.length, mimeType: mime, sharpness: ocr.sharpness, skew: ocr.skew, fields, source: ocr.source, storagePath, retentionUntil: new Date(Date.now() + RETENTION_DAYS * 86_400_000).toISOString() });
   return c.json({ id: rec.id, docType, source: ocr.source, sharpness: ocr.sharpness, skew: ocr.skew, fields });
 });
 
@@ -289,7 +296,7 @@ app.post("/kyc/submit", async (c) => {
   const registry = { gst: (g: string) => dataset().gst.get(g) ?? null, udyam: (u: string) => dataset().udyam.get(u) ?? null };
   const result = assess(docs, sharp, registry, { contactName: profile.contactName, gstin: profile.gstin, udyamNumber: profile.udyamNumber }, KYC_REFERENCE_DATE, required);
   for (const f of extra) result.findings = result.findings.filter((x) => !(x.document === f.document && x.code === "missing_document")).concat(f);
-  if (extra.length && result.verdict === "PASS") result.verdict = "REVIEW";
+  result.verdict = verdictOf(result.findings);
   const kc = await store.saveKycCase({ sessionId: s, result, decidedBy: "engine" });
   return c.json({ kycCaseId: kc.id, verdict: result.verdict, findings: result.findings.map((f) => explainFinding(f, l)), engineVersion: KYC_ENGINE_VERSION, registrySource: "SIMULATED", referenceDate: KYC_REFERENCE_DATE });
 });
@@ -337,12 +344,20 @@ app.get("/demo/specimens/:applicant/:docType", async (c) => {
   if (process.env.DEMO_SPECIMENS === "0") throw new HttpError(404, "disabled");
   const a = c.req.param("applicant"), d = c.req.param("docType");
   if (!/^K(0[1-9]|1[0-2])$/.test(a) || !(DOC_TYPES as string[]).includes(d)) throw new HttpError(400, "bad_specimen");
-  const { readFile } = await import("node:fs/promises");
-  const { resolve } = await import("node:path");
-  const { DATASET_DIR } = await import("./data/dataset.ts");
   try {
-    const buf = await readFile(resolve(DATASET_DIR, "kyc_documents", `${a}_${d}.png`));
-    return c.body(new Uint8Array(buf), 200, { "content-type": "image/png", "cache-control": "no-store" });
+    let buf: Uint8Array;
+    if (localDatasetAvailable()) {
+      const { readFile } = await import("node:fs/promises");
+      const { DATASET_DIR } = await import("./data/dataset.ts");
+      buf = new Uint8Array(await readFile(resolvePath(DATASET_DIR, "kyc_documents", `${a}_${d}.png`)));
+    } else {
+      // Hosted: specimens live in a private bucket uploaded by scripts/seed-supabase.ts.
+      const { supabaseAdmin } = await import("./data/supabaseStore.ts");
+      const { data, error } = await supabaseAdmin().storage.from("kyc-specimens").download(`${a}_${d}.png`);
+      if (error || !data) throw new Error("missing");
+      buf = new Uint8Array(await data.arrayBuffer());
+    }
+    return c.body(buf as Uint8Array<ArrayBuffer>, 200, { "content-type": "image/png", "cache-control": "no-store" });
   } catch {
     throw new HttpError(404, "no_such_specimen");
   }
@@ -358,6 +373,15 @@ app.get("/backoffice/kyc-queue", async (c) => {
   const profiles = new Map(await store.allProfiles());
   const cases = (await store.allKycCases()).filter((k) => k.result.verdict !== "PASS");
   return c.json(cases.map((k) => ({ id: k.id, verdict: k.result.verdict, business: profiles.get(k.sessionId)?.businessName, gstin: maskId(profiles.get(k.sessionId)?.gstin), createdAt: k.createdAt, findings: k.result.findings.filter((f) => f.severity !== "info").map((f) => explainFinding(f, "en")) })));
+});
+
+/** Reviewer view of a case's images: 60-second signed URLs from the private bucket (Supabase mode only). */
+app.get("/backoffice/kyc/:id/documents", async (c) => {
+  backoffice(c);
+  const kc = (await store.allKycCases()).find((k) => k.id === c.req.param("id"));
+  if (!kc) throw new HttpError(404, "case_not_found");
+  const docs = await store.kycDocs(kc.sessionId);
+  return c.json(await Promise.all(docs.map(async (d) => ({ docType: d.docType, source: d.source, url: d.storagePath && store.documentUrl ? await store.documentUrl(d.storagePath) : null }))));
 });
 
 app.post("/backoffice/kyc/:id/decide", async (c) => {

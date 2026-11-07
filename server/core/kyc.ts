@@ -124,7 +124,11 @@ export function assess(
   const inner = /\(prop\.?\s*([^)]+)\)/i.exec(gst.legal_name ?? "");
   if (inner && gst.trade_name && canon(inner[1]) !== canon(gst.trade_name)) add("review", "gst_certificate", "legal_vs_trade_name_internal", { legalRefers: inner[1], tradeName: gst.trade_name });
 
-  const sev = new Set(F.map((f) => f.severity));
-  const verdict: Verdict = sev.has("reject") ? "REJECT" : sev.has("review") ? "REVIEW" : sev.has("action") ? "NEEDS_ACTION" : "PASS";
-  return { verdict, findings: F, resolvedGstin: greg?.gstin };
+  return { verdict: verdictOf(F), findings: F, resolvedGstin: greg?.gstin };
+}
+
+/** Most severe finding wins: reject > review > action > pass. */
+export function verdictOf(findings: KycFinding[]): Verdict {
+  const sev = new Set(findings.map((f) => f.severity));
+  return sev.has("reject") ? "REJECT" : sev.has("review") ? "REVIEW" : sev.has("action") ? "NEEDS_ACTION" : "PASS";
 }

@@ -39,7 +39,14 @@ export async function readDocument(docType: DocType, file: Buffer, mimeType: str
       }
     } catch { /* fall back to cache */ }
   }
-  const hit = specimenCache()[sha256(file)];
+  const hash = sha256(file);
+  let hit = specimenCache()[hash];
+  if (!hit && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Hosted: the cache file isn't deployed, so look the hash up in Supabase.
+    const { supabaseAdmin } = await import("../data/supabaseStore.ts");
+    const { data } = await supabaseAdmin().from("ocr_specimen_cache").select("*").eq("sha256", hash).maybeSingle();
+    if (data) hit = { specimen: data.specimen, doc_type: data.doc_type, fields: data.fields, sharpness: Number(data.sharpness), skew: Number(data.skew) };
+  }
   if (hit && hit.doc_type === docType) return { fields: hit.fields, sharpness: hit.sharpness, skew: hit.skew, source: "cached_specimen", specimen: hit.specimen };
   return { fields: {}, source: "unrecognised" };
 }

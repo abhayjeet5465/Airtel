@@ -15,6 +15,7 @@ async function chat(system: string, user: string, json: boolean): Promise<string
   const key = process.env.LLM_API_KEY;
   if (!key) return null;
   const url = PROVIDERS[process.env.LLM_PROVIDER ?? "groq"] ?? process.env.LLM_PROVIDER!;
+  const model = process.env.LLM_MODEL ?? "openai/gpt-oss-120b";
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
@@ -23,9 +24,11 @@ async function chat(system: string, user: string, json: boolean): Promise<string
       signal: ctrl.signal,
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: process.env.LLM_MODEL ?? "llama-3.3-70b-versatile",
+        model,
         temperature: 0,
-        max_tokens: 500,
+        max_tokens: 1200,
+        // gpt-oss models reason before answering; keep it short so the advisor stays under the timeout.
+        ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
         ...(json ? { response_format: { type: "json_object" } } : {}),
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
       }),
@@ -41,6 +44,8 @@ async function chat(system: string, user: string, json: boolean): Promise<string
 }
 
 const count = z.coerce.number().int().min(0).max(500).optional();
+// Models sometimes answer a flag with a description ("UPI billing") instead of true.
+const flag = z.preprocess((v) => (typeof v === "string" ? !/^(false|no|none|0|)$/i.test(v.trim()) : v), z.boolean()).optional();
 const ParsedNeeds = z.object({
   businessType: z.string().max(60).optional(),
   segment: z.enum(["micro", "prof", "multi", "mfg"]).optional(),
@@ -49,11 +54,11 @@ const ParsedNeeds = z.object({
   currentInternet: z.enum(["none", "mobile_hotspot", "home_broadband", "business_broadband", "leased_line", "mixed"]).optional(),
   priority: z.enum(["lowest_price", "reliability"]).optional(),
   wants: z.object({
-    payments: z.boolean().optional(), whatsapp: z.boolean().optional(), sms: z.boolean().optional(), website: z.boolean().optional(),
-    cctvCameras: count, guestWifi: z.boolean().optional(), phoneLines: count, emailUsers: count, backupInternet: z.boolean().optional(),
-    securityDevices: count, centralManagement: z.boolean().optional(), dedicatedBandwidth: z.boolean().optional(), machineDevices: count,
-    fleetVehicles: count, cloudBackup: z.boolean().optional(), tollFree: z.boolean().optional(), callChannels: count,
-    staticIp: z.boolean().optional(), firewall: z.boolean().optional(),
+    payments: flag, whatsapp: flag, sms: flag, website: flag,
+    cctvCameras: count, guestWifi: flag, phoneLines: count, emailUsers: count, backupInternet: flag,
+    securityDevices: count, centralManagement: flag, dedicatedBandwidth: flag, machineDevices: count,
+    fleetVehicles: count, cloudBackup: flag, tollFree: flag, callChannels: count,
+    staticIp: flag, firewall: flag,
   }).partial().default({}),
 });
 export type ParsedNeeds = z.infer<typeof ParsedNeeds>;
@@ -72,11 +77,19 @@ export async function extractNeeds(text: string): Promise<{ parsed: ParsedNeeds;
   const raw = await chat(EXTRACT_PROMPT, text.slice(0, 1500), true);
   if (raw) {
     try {
-      const parsed = ParsedNeeds.safeParse(JSON.parse(raw));
+      const parsed = ParsedNeeds.safeParse(dropNulls(JSON.parse(raw)));
       if (parsed.success) return { parsed: parsed.data, mode: "llm" };
+      if (!process.env.VERCEL) console.warn("LLM needs rejected by schema:", parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
     } catch { /* fall through */ }
   }
   return { parsed: keywordNeeds(text), mode: "keywords" };
+}
+
+/** Models often send null for "not mentioned"; treat that as absent. */
+function dropNulls(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(dropNulls);
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).filter(([, x]) => x !== null).map(([k, x]) => [k, dropNulls(x)]));
+  return v;
 }
 
 /** Deterministic fallback parser (English + Hindi keywords). */

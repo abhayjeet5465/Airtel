@@ -22,7 +22,7 @@ export interface Profile {
 
 export interface QuoteRecord { id: string; sessionId: string; needs: Needs; bundle: Bundle; quote: Quote; status: "draft" | "accepted" | "invalidated"; createdAt: string; validUntil: string }
 export interface ConsentRecord { id: string; sessionId: string; purpose: "registry_lookup" | "kyc_verification" | "order_communication"; noticeVersion: string; lang: Lang; grantedAt: string; withdrawnAt?: string }
-export interface KycDocRecord { id: string; sessionId: string; docType: DocType; sha256: string; sizeBytes: number; mimeType: string; sharpness?: number; skew?: number; fields: Fields; source: "ocr_service" | "cached_specimen" | "unrecognised"; uploadedAt: string; retentionUntil: string }
+export interface KycDocRecord { id: string; sessionId: string; docType: DocType; sha256: string; sizeBytes: number; mimeType: string; sharpness?: number; skew?: number; fields: Fields; source: "ocr_service" | "cached_specimen" | "unrecognised"; storagePath?: string; uploadedAt: string; retentionUntil: string }
 export interface KycCaseRecord { id: string; sessionId: string; result: KycResult; decidedBy: "engine" | "reviewer"; reviewerNote?: string; createdAt: string }
 export type OrderStatus = "placed" | "kyc_verified" | "installation_scheduled" | "installed" | "activated" | "on_hold" | "cancelled";
 export interface OrderRecord { id: string; sessionId: string; quoteId: string; kycCaseId: string; status: OrderStatus; expectedActivationDate: string; slot: { date: string; window: string }; history: { status: OrderStatus; note: string; at: string }[]; createdAt: string }
@@ -31,6 +31,10 @@ export interface AdvisorRecord { sessionId: string; needs: Needs; recommendation
 export interface Store {
   mode: "memory" | "supabase";
   createSession(): Promise<string>;
+  hasSession(s: string): Promise<boolean>;
+  /** Optional: keep the image in private storage (Supabase). Memory mode keeps only hash + fields. */
+  putDocumentImage?(sessionId: string, docType: string, buf: Buffer, mime: string): Promise<string>;
+  documentUrl?(path: string): Promise<string>;
   getProfile(s: string): Promise<Profile | null>;
   saveProfile(s: string, p: Profile): Promise<void>;
   saveAdvisor(r: AdvisorRecord): Promise<void>;
@@ -92,6 +96,7 @@ export class MemoryStore implements Store {
   }
 
   async createSession() { const id = randomUUID(); this.sessions.add(id); return this.save(id); }
+  async hasSession(s: string) { return this.sessions.has(s); }
   async getProfile(s: string) { return this.profiles.get(s) ?? null; }
   async saveProfile(s: string, p: Profile) { this.profiles.set(s, p); this.save(0); }
   async allProfiles() { return [...this.profiles.entries()]; }
