@@ -4,7 +4,7 @@ import { resolve as resolvePath } from "node:path";
 import { Hono, type Context } from "hono";
 import { z } from "zod";
 import { PRODUCTS, product } from "./core/catalogue.ts";
-import { t } from "./core/i18n.ts";
+import { PRODUCT_DESCRIPTION_HI, t } from "./core/i18n.ts";
 import { assess, DOC_TYPES, KYC_ENGINE_VERSION, verdictOf, type Fields } from "./core/kyc.ts";
 import { leadScore, route } from "./core/leadScore.ts";
 import { quote } from "./core/pricing.ts";
@@ -192,9 +192,11 @@ async function needsFor(s: string, body: unknown): Promise<{ needs: Needs; profi
   return { profile, needs: { ...n, cityTier: profile.cityTier, city: profile.city, wants: n.wants as Needs["wants"] } };
 }
 
+const describe = (id: string, l: Lang) => (l === "hi" && PRODUCT_DESCRIPTION_HI[id]) || product(id).description;
+
 function quoteView(bundle: Bundle, l: Lang) {
   const q = quote(bundle);
-  return { ...q, lines: q.lines.map((x) => ({ ...x, description: product(x.productId).description })), language: l };
+  return { ...q, lines: q.lines.map((x) => ({ ...x, description: describe(x.productId, l) })), language: l };
 }
 
 app.post("/recommend", async (c) => {
@@ -205,11 +207,12 @@ app.post("/recommend", async (c) => {
   await store.saveAdvisor({ sessionId: s, needs, recommendation: rec, mode: llmConfigured() ? "llm" : "structured", at: new Date().toISOString() });
   const items = rec.items.map((i) => ({ ...i, name: product(i.productId).name, reasonsText: i.reasons.map((r) => t(r, l)) }));
   const unmet = rec.unmet.map((u) => ({ ...u, reasonsText: [...new Set(u.failures.map((f) => explainFailure(f, l)))] }));
-  const bullets = [...items.map((i) => `${i.name}: ${i.reasonsText[0]}`), ...unmet.flatMap((u) => u.reasonsText), ...rec.notes.map((n) => t(n, l))];
-  const summary = (await phraseExplanation(l, bullets, needs)) ?? null;
+  // Exclusions and notes are shown verbatim on the plan screen; the summary covers only what is in the plan.
+  const bullets = items.map((i) => `${i.name}: ${i.reasonsText.join(" ")}`);
+  const summary = bullets.length ? (await phraseExplanation(l, bullets, needs)) ?? null : null;
   return c.json({
     recommendation: { ...rec, items, unmet, notesText: rec.notes.map((n) => t(n, l)), summary, summarySource: summary ? "llm" : "template" },
-    addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: product(id).description, defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),
+    addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: describe(id, l), defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),
     quote: quoteView(rec.bundle, l),
     gstStatus: profile.gstStatus,
   });

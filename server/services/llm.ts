@@ -130,12 +130,18 @@ export function keywordNeeds(text: string): ParsedNeeds {
   };
 }
 
-/** Optional plain-language summary. Rejected (-> template) if it contains digits or product codes: prices and
- *  quantities must only ever come from the deterministic engine. */
+const toAsciiDigits = (s: string) => s.replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 0x0966));
+const numbersIn = (s: string) => toAsciiDigits(s).match(/\d+(?:[.,]\d+)*/g) ?? [];
+
+/** Optional plain-language summary. Rejected (-> template) if it contains a product code or any number that is
+ *  not already in the engine's bullets: prices and quantities must only ever come from the deterministic engine. */
 export async function phraseExplanation(lang: Lang, bullets: string[], needs: Needs): Promise<string | null> {
   const sys = `Rewrite the bullet points as 2-3 short, warm sentences for a small business owner, in ${lang === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
-Do not add any product, feature, number, price or promise that is not in the bullets. Do not use digits.`;
+Do not add any product, feature, number, price or promise that is not in the bullets. Copy any number exactly as written in the bullets; never calculate or introduce new numbers.`;
   const out = await chat(sys, `Business: ${needs.businessType ?? needs.segment}\n- ${bullets.join("\n- ")}`, false);
-  if (!out || /[0-9₹]|P\d\d/.test(out) || out.length > 600) return null;
+  if (!out || out.length > 600 || /P\d\d/.test(out)) return null;
+  const allowed = new Set(numbersIn(bullets.join(" ")));
+  if (numbersIn(out).some((n) => !allowed.has(n))) return null;
+  if (out.includes("₹") && !bullets.some((b) => b.includes("₹"))) return null;
   return out.trim();
 }

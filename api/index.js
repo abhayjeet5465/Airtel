@@ -46534,6 +46534,33 @@ function t(key, lang2, params = {}) {
   const m = MESSAGES[key]?.[lang2] ?? MESSAGES[key]?.en ?? key;
   return m.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`));
 }
+var PRODUCT_DESCRIPTION_HI = {
+  P01: "\u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092B\u093C\u093E\u0907\u092C\u0930 \u092C\u094D\u0930\u0949\u0921\u092C\u0948\u0902\u0921, 100 Mbps, \u0905\u0928\u0932\u093F\u092E\u093F\u091F\u0947\u0921 \u0921\u0947\u091F\u093E",
+  P02: "\u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092B\u093C\u093E\u0907\u092C\u0930 \u092C\u094D\u0930\u0949\u0921\u092C\u0948\u0902\u0921, 300 Mbps, \u0905\u0928\u0932\u093F\u092E\u093F\u091F\u0947\u0921 \u0921\u0947\u091F\u093E, \u0938\u094D\u091F\u0948\u091F\u093F\u0915 IP \u0935\u0948\u0915\u0932\u094D\u092A\u093F\u0915",
+  P03: "\u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092B\u093C\u093E\u0907\u092C\u0930 \u092C\u094D\u0930\u0949\u0921\u092C\u0948\u0902\u0921, 1 Gbps, \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915\u0924\u093E \u0938\u0939\u093E\u092F\u0924\u093E",
+  P04: "\u0935\u093E\u092F\u0930\u0932\u0947\u0938 (5G FWA) \u092C\u094D\u0930\u0949\u0921\u092C\u0948\u0902\u0921, 100 Mbps, \u0932\u0917\u093E\u0913 \u0914\u0930 \u091A\u0932\u093E\u0913, \u091C\u0939\u093E\u0901 \u092B\u093C\u093E\u0907\u092C\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948 \u0935\u0939\u093E\u0901 \u0915\u0947 \u0932\u093F\u090F",
+  P05: "\u0938\u092E\u0930\u094D\u092A\u093F\u0924 1:1 \u0907\u0902\u091F\u0930\u0928\u0947\u091F, 20 Mbps, 99.5% SLA",
+  P06: "\u0938\u092E\u0930\u094D\u092A\u093F\u0924 1:1 \u0907\u0902\u091F\u0930\u0928\u0947\u091F, 100 Mbps, 99.9% SLA",
+  P07: "\u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092E\u094B\u092C\u093E\u0907\u0932 \u0932\u093E\u0907\u0928, 50 GB \u0921\u0947\u091F\u093E, \u0905\u0928\u0932\u093F\u092E\u093F\u091F\u0947\u0921 \u0915\u0949\u0932",
+  P08: "\u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092E\u094B\u092C\u093E\u0907\u0932 \u0932\u093E\u0907\u0928, 150 GB \u0921\u0947\u091F\u093E, \u0930\u094B\u092E\u093F\u0902\u0917, \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915\u0924\u093E \u0938\u0947\u0935\u093E",
+  P09: "\u092E\u0941\u0916\u094D\u092F \u0915\u0928\u0947\u0915\u094D\u0936\u0928 \u092C\u0902\u0926 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0905\u092A\u0928\u0947-\u0906\u092A \u091A\u0932\u0928\u0947 \u0935\u093E\u0932\u093E \u092C\u0948\u0915\u0905\u092A \u0930\u093E\u0909\u091F\u0930, \u0921\u0947\u091F\u093E SIM \u0915\u0947 \u0938\u093E\u0925",
+  P10: "\u0938\u092D\u0940 \u0936\u093E\u0916\u093E\u0913\u0902 \u0915\u0947 \u0915\u0928\u0947\u0915\u094D\u0936\u0928 \u090F\u0915 \u091C\u0917\u0939 \u0938\u0947 \u0938\u0902\u092D\u093E\u0932\u0947\u0902, \u091C\u093C\u0930\u0942\u0930\u0940 \u0910\u092A\u094D\u0938 \u0915\u094B \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915\u0924\u093E",
+  P11: "CCTV, \u0938\u0930\u094D\u0935\u0930 \u092F\u093E \u0930\u093F\u092E\u094B\u091F \u090F\u0915\u094D\u0938\u0947\u0938 \u0915\u0947 \u0932\u093F\u090F \u0938\u094D\u0925\u093E\u092F\u0940 \u092A\u092C\u094D\u0932\u093F\u0915 IP",
+  P12: "\u0907\u0902\u091F\u0930\u0928\u0947\u091F \u092A\u0930 \u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u092B\u093C\u094B\u0928 \u0932\u093E\u0907\u0928\u0947\u0902, IVR \u0914\u0930 \u0915\u0949\u0932 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u093F\u0902\u0917 \u0915\u0947 \u0938\u093E\u0925",
+  P13: "1800 \u0928\u0902\u092C\u0930, \u092E\u094B\u092C\u093E\u0907\u0932 \u092F\u093E \u0915\u094D\u0932\u093E\u0909\u0921 \u091F\u0947\u0932\u0940\u092B\u093C\u094B\u0928\u0940 \u092A\u0930",
+  P14: "\u0905\u0932\u0930\u094D\u091F \u0914\u0930 \u092A\u094D\u0930\u091A\u093E\u0930 \u0915\u0947 \u0932\u093F\u090F \u0939\u0930 \u092E\u0939\u0940\u0928\u0947 10,000 SMS, DLT \u092A\u0902\u091C\u0940\u0915\u0930\u0923 \u092E\u0947\u0902 \u092E\u0926\u0926",
+  P15: "\u0938\u0924\u094D\u092F\u093E\u092A\u093F\u0924 WhatsApp \u091A\u0948\u0928\u0932, \u0915\u0948\u091F\u0932\u0949\u0917, \u0939\u0930 \u092E\u0939\u0940\u0928\u0947 1,000 \u092C\u093E\u0924\u091A\u0940\u0924",
+  P16: "\u0905\u092A\u0928\u0947 \u0921\u094B\u092E\u0947\u0928 \u092A\u0930 \u092C\u093F\u091C\u093C\u0928\u0947\u0938 \u0908\u092E\u0947\u0932, \u0926\u0938\u094D\u0924\u093E\u0935\u0947\u091C\u093C, \u0935\u0940\u0921\u093F\u092F\u094B \u092E\u0940\u091F\u093F\u0902\u0917",
+  P17: "PC \u0914\u0930 \u092B\u093C\u094B\u0928 \u0915\u093E \u0905\u092A\u0928\u0947-\u0906\u092A \u092C\u0948\u0915\u0905\u092A, 1 TB",
+  P18: "\u0921\u094B\u092E\u0947\u0928, 5 \u092A\u0947\u091C \u0915\u0940 \u0935\u0947\u092C\u0938\u093E\u0907\u091F \u092C\u0928\u093E\u0928\u0947 \u0915\u093E \u091F\u0942\u0932, \u0939\u094B\u0938\u094D\u091F\u093F\u0902\u0917, SSL",
+  P19: "GST \u0935\u093E\u0932\u0940 \u092C\u093F\u0932\u093F\u0902\u0917, \u0938\u094D\u091F\u0949\u0915, \u091F\u0948\u092C\u0932\u0947\u091F \u092A\u0930 UPI/\u0915\u093E\u0930\u094D\u0921 \u092D\u0941\u0917\u0924\u093E\u0928",
+  P20: "PC \u0914\u0930 \u092B\u093C\u094B\u0928 \u0915\u0947 \u0932\u093F\u090F \u090F\u0902\u091F\u0940\u0935\u093E\u092F\u0930\u0938 \u0914\u0930 \u0930\u0948\u0928\u0938\u092E\u0935\u0947\u092F\u0930 \u0938\u0941\u0930\u0915\u094D\u0937\u093E",
+  P21: "\u0926\u0941\u0915\u093E\u0928/\u0911\u092B\u093C\u093F\u0938 \u092A\u0930 \u0928\u0947\u0915\u094D\u0938\u094D\u091F-\u091C\u0947\u0928 \u092B\u093C\u093E\u092F\u0930\u0935\u0949\u0932, Accel SOC \u0926\u094D\u0935\u093E\u0930\u093E \u0938\u0902\u091A\u093E\u0932\u093F\u0924",
+  P22: "\u0917\u094D\u0930\u093E\u0939\u0915\u094B\u0902 \u0915\u0947 \u0932\u093F\u090F \u0905\u0932\u0917 Wi-Fi \u0914\u0930 \u0915\u0902\u091F\u0947\u0902\u091F \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0935\u093E\u0932\u093E \u092E\u0948\u0928\u0947\u091C\u094D\u0921 Wi-Fi",
+  P23: "HD \u0915\u0948\u092E\u0930\u093E, 30 \u0926\u093F\u0928 \u0915\u0940 \u0915\u094D\u0932\u093E\u0909\u0921 \u0930\u093F\u0915\u0949\u0930\u094D\u0921\u093F\u0902\u0917, \u092E\u094B\u092C\u093E\u0907\u0932 \u0910\u092A \u092A\u0930 \u0926\u0947\u0916\u0947\u0902",
+  P24: "\u092E\u0936\u0940\u0928 \u0915\u0947 \u091A\u0932\u0928\u0947 \u0915\u093E \u0938\u092E\u092F \u0914\u0930 \u092C\u093F\u091C\u0932\u0940 \u0916\u092A\u0924 \u0926\u0947\u0916\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F IoT SIM + \u0938\u0947\u0902\u0938\u0930 \u0915\u093F\u091F",
+  P25: "IoT SIM \u0935\u093E\u0932\u093E GPS \u091F\u094D\u0930\u0948\u0915\u0930, \u0932\u093E\u0907\u0935 \u0921\u0948\u0936\u092C\u094B\u0930\u094D\u0921 \u0915\u0947 \u0938\u093E\u0925"
+};
 
 // server/core/validators.ts
 var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -47314,12 +47341,17 @@ function keywordNeeds(text) {
     wants
   };
 }
+var toAsciiDigits = (s) => s.replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 2406));
+var numbersIn = (s) => toAsciiDigits(s).match(/\d+(?:[.,]\d+)*/g) ?? [];
 async function phraseExplanation(lang2, bullets, needs) {
   const sys = `Rewrite the bullet points as 2-3 short, warm sentences for a small business owner, in ${lang2 === "hi" ? "simple Hindi (Devanagari)" : "simple English"}.
-Do not add any product, feature, number, price or promise that is not in the bullets. Do not use digits.`;
+Do not add any product, feature, number, price or promise that is not in the bullets. Copy any number exactly as written in the bullets; never calculate or introduce new numbers.`;
   const out = await chat(sys, `Business: ${needs.businessType ?? needs.segment}
 - ${bullets.join("\n- ")}`, false);
-  if (!out || /[0-9₹]|P\d\d/.test(out) || out.length > 600) return null;
+  if (!out || out.length > 600 || /P\d\d/.test(out)) return null;
+  const allowed = new Set(numbersIn(bullets.join(" ")));
+  if (numbersIn(out).some((n) => !allowed.has(n))) return null;
+  if (out.includes("\u20B9") && !bullets.some((b) => b.includes("\u20B9"))) return null;
   return out.trim();
 }
 
@@ -47543,9 +47575,10 @@ async function needsFor(s, body) {
   const n = NeedsIn.parse(body);
   return { profile, needs: { ...n, cityTier: profile.cityTier, city: profile.city, wants: n.wants } };
 }
+var describe3 = (id, l) => l === "hi" && PRODUCT_DESCRIPTION_HI[id] || product(id).description;
 function quoteView(bundle, l) {
   const q = quote(bundle);
-  return { ...q, lines: q.lines.map((x) => ({ ...x, description: product(x.productId).description })), language: l };
+  return { ...q, lines: q.lines.map((x) => ({ ...x, description: describe3(x.productId, l) })), language: l };
 }
 app.post("/recommend", async (c) => {
   const s = await session(c);
@@ -47555,11 +47588,11 @@ app.post("/recommend", async (c) => {
   await store.saveAdvisor({ sessionId: s, needs, recommendation: rec, mode: llmConfigured() ? "llm" : "structured", at: (/* @__PURE__ */ new Date()).toISOString() });
   const items = rec.items.map((i) => ({ ...i, name: product(i.productId).name, reasonsText: i.reasons.map((r) => t(r, l)) }));
   const unmet = rec.unmet.map((u) => ({ ...u, reasonsText: [...new Set(u.failures.map((f) => explainFailure(f, l)))] }));
-  const bullets = [...items.map((i) => `${i.name}: ${i.reasonsText[0]}`), ...unmet.flatMap((u) => u.reasonsText), ...rec.notes.map((n) => t(n, l))];
-  const summary = await phraseExplanation(l, bullets, needs) ?? null;
+  const bullets = items.map((i) => `${i.name}: ${i.reasonsText.join(" ")}`);
+  const summary = bullets.length ? await phraseExplanation(l, bullets, needs) ?? null : null;
   return c.json({
     recommendation: { ...rec, items, unmet, notesText: rec.notes.map((n) => t(n, l)), summary, summarySource: summary ? "llm" : "template" },
-    addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: product(id).description, defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),
+    addOns: rec.optionalAddOns.map((id) => ({ id, name: product(id).name, description: describe3(id, l), defaultQuantity: defaultQuantity(id, needs), listPrice: product(id).listPrice, unit: product(id).unit })),
     quote: quoteView(rec.bundle, l),
     gstStatus: profile.gstStatus
   });
