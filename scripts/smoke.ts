@@ -2,13 +2,16 @@
  *  K12 (clean -> order + tracker) and K11 (stale bill -> NEEDS_ACTION, order refused). */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { app } from "../server/app.ts";
+// BASE_URL=https://… runs the same journeys against a deployed site; otherwise in-process.
+const BASE = process.env.BASE_URL?.replace(/\/$/, "");
+const app = BASE ? null : (await import("../server/app.ts")).app;
 
 const KYC = resolve(import.meta.dirname, "../../YTL_TrackA_Udyam_Digital_Data/kyc_documents");
 let sid = "";
 async function call(method: string, path: string, body?: unknown, extra: Record<string, string> = {}) {
   const isForm = body instanceof FormData;
-  const res = await app.request(`/api${path}`, {
+  const send = (url: string, init: RequestInit) => (BASE ? fetch(`${BASE}${url}`, init) : app!.request(url, init));
+  const res = await send(`/api${path}`, {
     method,
     headers: { ...(sid ? { "x-session-id": sid } : {}), ...(isForm || !body ? {} : { "content-type": "application/json" }), ...extra },
     body: isForm ? body : body ? JSON.stringify(body) : undefined,

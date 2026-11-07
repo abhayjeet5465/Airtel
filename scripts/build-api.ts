@@ -3,7 +3,8 @@ import { build } from "esbuild";
 
 await build({
   entryPoints: ["server/vercel.ts"],
-  outfile: "api/[[...route]].js",
+  // One function; vercel.json rewrites every /api/* path to it (catch-all filenames only matched one segment).
+  outfile: "api/index.js",
   bundle: true,
   platform: "node",
   format: "esm",
@@ -13,4 +14,4 @@ await build({
   // Some CommonJS dependencies call require(); give the ESM bundle one.
   banner: { js: "import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);" },
 });
-console.log("built api/[[...route]].js");
+console.log("built api/index.js");
