@@ -31,3 +31,4 @@ server/data/private/
 *.local.json
 .vercel
 
+__pycache__/
