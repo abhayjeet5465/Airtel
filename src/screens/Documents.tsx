@@ -16,7 +16,7 @@ const verdictTone = { PASS: "ok", NEEDS_ACTION: "warn", REVIEW: "info", REJECT: 
 export function Documents() {
   const { j, set, lang } = useJourney();
   const p = j.profile;
-  const [consented, setConsented] = useState(false);
+  const [consented, setConsented] = useState<boolean | null>(null);
   const [agreeKyc, setAgreeKyc] = useState(false);
   const [agreeLookup, setAgreeLookup] = useState(true);
   const [lookupOk, setLookupOk] = useState(false);
@@ -29,6 +29,10 @@ export function Documents() {
     api("GET", "/consent").then((cs: any[]) => {
       setConsented(cs.some((c) => c.purpose === "kyc_verification"));
       setLookupOk(cs.some((c) => c.purpose === "registry_lookup"));
+    }).catch(() => setConsented(false));
+    // After a reload, show documents already uploaded in this session instead of empty slots.
+    api("GET", "/kyc").then((k: any) => {
+      setDocs(Object.fromEntries(k.docs.map((d: any) => [d.docType, { state: "read", name: DOC_LABEL[d.docType]?.[lang] }])));
     }).catch(() => {});
   }, []);
 
@@ -86,6 +90,7 @@ export function Documents() {
     } catch { setError(tr("errorGeneric", lang)); } finally { setBusy(false); }
   }
 
+  if (consented === null) return null;
   if (!consented) {
     return (
       <div className="space-y-5">

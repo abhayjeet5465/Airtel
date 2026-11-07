@@ -12,7 +12,7 @@ import { Steps } from "./ui.tsx";
 const SCREENS = [Business, Needs, Plan, Documents, Track];
 
 export function App() {
-  const { j, lang, setLang } = useJourney();
+  const { j, lang, setLang, reset } = useJourney();
   const [route, setRoute] = useState(location.hash);
   useEffect(() => {
     const on = () => setRoute(location.hash);
@@ -36,7 +36,10 @@ export function App() {
           </span>
         </a>
         {!backOffice && (
-          <button className="rounded-full border border-line bg-white px-3 py-1 text-sm font-semibold" onClick={() => setLang(lang === "en" ? "hi" : "en")}>{tr("switchLang", lang)}</button>
+          <div className="flex items-center gap-3">
+            {j.step > 0 && j.step < 4 && <button className="text-sm text-ink-soft underline underline-offset-2" onClick={reset}>{tr("startOver", lang)}</button>}
+            <button className="rounded-full border border-line bg-white px-3 py-1 text-sm font-semibold" onClick={() => setLang(lang === "en" ? "hi" : "en")}>{tr("switchLang", lang)}</button>
+          </div>
         )}
       </header>
       {backOffice ? (
