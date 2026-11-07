@@ -1,0 +1,679 @@
+{
+  "version": "catalogue-2026-10-04+midpoint-v1",
+  "pricePolicy": "midpoint-v1",
+  "products": [
+    {
+      "id": "P01",
+      "category": "Connectivity",
+      "name": "Biz Fibre 100",
+      "description": "Business fibre broadband, 100 Mbps, unlimited data",
+      "unit": "per site",
+      "priceMin": 999,
+      "priceMax": 1199,
+      "listPrice": 1099,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 5,
+      "targetSegments": [
+        "micro",
+        "prof"
+      ]
+    },
+    {
+      "id": "P02",
+      "category": "Connectivity",
+      "name": "Biz Fibre 300",
+      "description": "Business fibre broadband, 300 Mbps, unlimited data, static IP optional",
+      "unit": "per site",
+      "priceMin": 1499,
+      "priceMax": 1799,
+      "listPrice": 1649,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 5,
+      "targetSegments": [
+        "prof",
+        "multi"
+      ]
+    },
+    {
+      "id": "P03",
+      "category": "Connectivity",
+      "name": "Biz Fibre 1G",
+      "description": "Business fibre broadband, 1 Gbps, priority support",
+      "unit": "per site",
+      "priceMin": 3999,
+      "priceMax": 4499,
+      "listPrice": 4249,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1
+      ],
+      "minEmployees": 5,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 7,
+      "targetSegments": [
+        "prof",
+        "multi",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P04",
+      "category": "Connectivity",
+      "name": "Biz 5G AirFiber 100",
+      "description": "Wireless (5G FWA) broadband, 100 Mbps, plug-and-play, for sites without fibre",
+      "unit": "per site",
+      "priceMin": 899,
+      "priceMax": 1099,
+      "listPrice": 999,
+      "setupFee": 0,
+      "minContractMonths": 6,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 2,
+      "targetSegments": [
+        "micro",
+        "prof"
+      ]
+    },
+    {
+      "id": "P05",
+      "category": "Connectivity",
+      "name": "Internet Leased Line 20",
+      "description": "Dedicated 1:1 internet, 20 Mbps, 99.5% SLA",
+      "unit": "per site",
+      "priceMin": 8000,
+      "priceMax": 12000,
+      "listPrice": 10000,
+      "setupFee": 10000,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 10,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 21,
+      "targetSegments": [
+        "mfg",
+        "multi"
+      ]
+    },
+    {
+      "id": "P06",
+      "category": "Connectivity",
+      "name": "Internet Leased Line 100",
+      "description": "Dedicated 1:1 internet, 100 Mbps, 99.9% SLA",
+      "unit": "per site",
+      "priceMin": 25000,
+      "priceMax": 35000,
+      "listPrice": 30000,
+      "setupFee": 15000,
+      "minContractMonths": 24,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 25,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 30,
+      "targetSegments": [
+        "mfg"
+      ]
+    },
+    {
+      "id": "P07",
+      "category": "Connectivity",
+      "name": "Business Postpaid 299",
+      "description": "Business mobile line, 50 GB data, unlimited calls",
+      "unit": "per line",
+      "priceMin": 299,
+      "priceMax": 399,
+      "listPrice": 349,
+      "setupFee": 0,
+      "minContractMonths": 1,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 1,
+      "targetSegments": [
+        "micro",
+        "prof",
+        "multi",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P08",
+      "category": "Connectivity",
+      "name": "Business Postpaid 599",
+      "description": "Business mobile line, 150 GB data, roaming, priority care",
+      "unit": "per line",
+      "priceMin": 599,
+      "priceMax": 799,
+      "listPrice": 699,
+      "setupFee": 0,
+      "minContractMonths": 1,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 1,
+      "targetSegments": [
+        "prof",
+        "multi",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P09",
+      "category": "Connectivity",
+      "name": "Backup 4G/5G Failover",
+      "description": "Automatic failover router with data SIM for when the main link is down",
+      "unit": "per site",
+      "priceMin": 499,
+      "priceMax": 599,
+      "listPrice": 549,
+      "setupFee": 1500,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P05",
+        "P06"
+      ],
+      "installDays": 3,
+      "targetSegments": [
+        "multi",
+        "prof"
+      ]
+    },
+    {
+      "id": "P10",
+      "category": "Connectivity",
+      "name": "Managed SD-WAN",
+      "description": "Central management of links across sites, app-priority routing",
+      "unit": "per site",
+      "priceMin": 2500,
+      "priceMax": 3500,
+      "listPrice": 3000,
+      "setupFee": 5000,
+      "minContractMonths": 24,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 10,
+      "minSites": 3,
+      "requiresGstin": true,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P05",
+        "P06"
+      ],
+      "installDays": 14,
+      "targetSegments": [
+        "multi"
+      ]
+    },
+    {
+      "id": "P11",
+      "category": "Connectivity",
+      "name": "Static IP",
+      "description": "Fixed public IP for CCTV, servers or remote access",
+      "unit": "per IP",
+      "priceMin": 200,
+      "priceMax": 300,
+      "listPrice": 250,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "installDays": 1,
+      "targetSegments": [
+        "prof",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P12",
+      "category": "Communication",
+      "name": "Cloud Telephony / SIP",
+      "description": "Business phone lines over internet with IVR, call recording",
+      "unit": "per channel",
+      "priceMin": 1000,
+      "priceMax": 1500,
+      "listPrice": 1250,
+      "setupFee": 2000,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 3,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06"
+      ],
+      "installDays": 5,
+      "targetSegments": [
+        "prof",
+        "multi"
+      ]
+    },
+    {
+      "id": "P13",
+      "category": "Communication",
+      "name": "Toll-free Number",
+      "description": "1800 number routed to mobile or cloud telephony",
+      "unit": "per number",
+      "priceMin": 1500,
+      "priceMax": 2000,
+      "listPrice": 1750,
+      "setupFee": 1000,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 3,
+      "targetSegments": [
+        "multi",
+        "prof"
+      ]
+    },
+    {
+      "id": "P14",
+      "category": "Communication",
+      "name": "Business SMS 10k",
+      "description": "10,000 SMS per month for alerts and promotions, DLT registration assisted",
+      "unit": "per pack",
+      "priceMin": 1500,
+      "priceMax": 2000,
+      "listPrice": 1750,
+      "setupFee": 0,
+      "minContractMonths": 1,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 4,
+      "targetSegments": [
+        "prof",
+        "multi",
+        "micro"
+      ]
+    },
+    {
+      "id": "P15",
+      "category": "Communication",
+      "name": "WhatsApp Business API Starter",
+      "description": "Verified WhatsApp channel, catalogue, 1,000 conversations a month",
+      "unit": "per account",
+      "priceMin": 999,
+      "priceMax": 1499,
+      "listPrice": 1249,
+      "setupFee": 0,
+      "minContractMonths": 3,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 3,
+      "targetSegments": [
+        "micro",
+        "prof",
+        "multi"
+      ]
+    },
+    {
+      "id": "P16",
+      "category": "Cloud & Productivity",
+      "name": "Cloud Email & Office Suite",
+      "description": "Business email on own domain, documents, video meetings",
+      "unit": "per user",
+      "priceMin": 125,
+      "priceMax": 150,
+      "listPrice": 138,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 1,
+      "targetSegments": [
+        "prof",
+        "multi",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P17",
+      "category": "Cloud & Productivity",
+      "name": "Cloud Backup 1 TB",
+      "description": "Automatic backup of PCs and phones, 1 TB",
+      "unit": "per account",
+      "priceMin": 499,
+      "priceMax": 699,
+      "listPrice": 599,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 1,
+      "targetSegments": [
+        "prof",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P18",
+      "category": "Cloud & Productivity",
+      "name": "Website + Domain Starter",
+      "description": "Domain, 5-page website builder, hosting, SSL",
+      "unit": "per account",
+      "priceMin": 299,
+      "priceMax": 499,
+      "listPrice": 399,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 2,
+      "targetSegments": [
+        "micro",
+        "prof"
+      ]
+    },
+    {
+      "id": "P19",
+      "category": "Cloud & Productivity",
+      "name": "Cloud POS & Billing",
+      "description": "GST-ready billing, inventory, UPI/card acceptance on a tablet",
+      "unit": "per counter",
+      "priceMin": 599,
+      "priceMax": 899,
+      "listPrice": 749,
+      "setupFee": 2500,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 3,
+      "targetSegments": [
+        "micro",
+        "multi"
+      ]
+    },
+    {
+      "id": "P20",
+      "category": "Security",
+      "name": "Endpoint Security",
+      "description": "Antivirus and ransomware protection for PCs and phones",
+      "unit": "per device",
+      "priceMin": 99,
+      "priceMax": 149,
+      "listPrice": 124,
+      "setupFee": 0,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 1,
+      "targetSegments": [
+        "prof",
+        "mfg",
+        "multi"
+      ]
+    },
+    {
+      "id": "P21",
+      "category": "Security",
+      "name": "Managed Firewall",
+      "description": "Next-gen firewall at the site, managed by Accel SOC",
+      "unit": "per site",
+      "priceMin": 1999,
+      "priceMax": 2999,
+      "listPrice": 2499,
+      "setupFee": 4000,
+      "minContractMonths": 24,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 10,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P05",
+        "P06"
+      ],
+      "installDays": 10,
+      "targetSegments": [
+        "mfg",
+        "multi",
+        "prof"
+      ]
+    },
+    {
+      "id": "P22",
+      "category": "Security",
+      "name": "Secure Wi-Fi with Guest Network",
+      "description": "Managed Wi-Fi access point with separate customer Wi-Fi and content filtering",
+      "unit": "per site",
+      "priceMin": 399,
+      "priceMax": 599,
+      "listPrice": 499,
+      "setupFee": 1000,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P04"
+      ],
+      "installDays": 3,
+      "targetSegments": [
+        "micro",
+        "multi",
+        "prof"
+      ]
+    },
+    {
+      "id": "P23",
+      "category": "IoT & Physical",
+      "name": "Cloud CCTV",
+      "description": "HD camera with 30-day cloud recording and mobile app view",
+      "unit": "per camera",
+      "priceMin": 199,
+      "priceMax": 299,
+      "listPrice": 249,
+      "setupFee": 1800,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06"
+      ],
+      "installDays": 4,
+      "targetSegments": [
+        "micro",
+        "multi",
+        "mfg"
+      ]
+    },
+    {
+      "id": "P24",
+      "category": "IoT & Physical",
+      "name": "Machine Monitoring IoT",
+      "description": "IoT SIM + sensor kit for machine uptime and energy use",
+      "unit": "per device",
+      "priceMin": 149,
+      "priceMax": 249,
+      "listPrice": 199,
+      "setupFee": 3000,
+      "minContractMonths": 24,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 10,
+      "minSites": 1,
+      "requiresGstin": true,
+      "requiresOneOf": [],
+      "installDays": 10,
+      "targetSegments": [
+        "mfg"
+      ]
+    },
+    {
+      "id": "P25",
+      "category": "IoT & Physical",
+      "name": "Fleet Tracker",
+      "description": "GPS tracker with IoT SIM and live dashboard",
+      "unit": "per vehicle",
+      "priceMin": 199,
+      "priceMax": 299,
+      "listPrice": 249,
+      "setupFee": 1500,
+      "minContractMonths": 12,
+      "cityTiers": [
+        1,
+        2
+      ],
+      "minEmployees": 1,
+      "minSites": 1,
+      "requiresGstin": false,
+      "requiresOneOf": [],
+      "installDays": 3,
+      "targetSegments": [
+        "multi",
+        "mfg"
+      ]
+    }
+  ]
+}

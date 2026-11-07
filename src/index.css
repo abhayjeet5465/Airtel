@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "@fontsource/mukta/400.css";
+@import "@fontsource/mukta/500.css";
+@import "@fontsource/mukta/600.css";
+@import "@fontsource/mukta/700.css";
+
+@theme {
+  --font-sans: "Mukta", system-ui, sans-serif;
+  --color-ink: #1b2a4a;
+  --color-ink-soft: #4a5876;
+  --color-paper: #f5f7fa;
+  --color-line: #d9dee7;
+  --color-marigold: #e8a317;
+  --color-marigold-deep: #c98a0c;
+  --color-leaf: #2e7d5b;
+  --color-amber: #b45309;
+  --color-alert: #b42318;
+}
+
+html { background: var(--color-paper); color: var(--color-ink); }
+body { font-family: var(--font-sans); font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.num { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 3px solid var(--color-marigold); outline-offset: 2px; border-radius: 6px; }
+
+/* The bill: the one memorable element. A torn-paper edge marks it as a receipt you can hold the operator to. */
+.bill {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-bottom: none;
+  position: relative;
+}
+.bill::after {
+  content: "";
+  position: absolute;
+  left: -1px; right: -1px; bottom: -10px; height: 10px;
+  background:
+    linear-gradient(135deg, #fff 33.33%, transparent 33.33%) 0 0 / 14px 10px repeat-x,
+    linear-gradient(225deg, #fff 33.33%, transparent 33.33%) 0 0 / 14px 10px repeat-x;
+  filter: drop-shadow(0 1px 0 var(--color-line));
+}
+.bill-rule { border-top: 1px dashed var(--color-line); }
+
+@keyframes total-tick { from { background: #fdf3dc; } to { background: transparent; } }
+.total-changed { animation: total-tick 900ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .total-changed { animation: none; } }
