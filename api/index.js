@@ -47721,7 +47721,9 @@ function backoffice(c) {
 app.get("/backoffice/kyc-queue", async (c) => {
   backoffice(c);
   const profiles = new Map(await store.allProfiles());
-  const cases = (await store.allKycCases()).filter((k) => k.result.verdict !== "PASS");
+  const latest = /* @__PURE__ */ new Map();
+  for (const k of await store.allKycCases()) latest.set(k.sessionId, k);
+  const cases = [...latest.values()].filter((k) => k.result.verdict !== "PASS");
   return c.json(cases.map((k) => ({ id: k.id, verdict: k.result.verdict, business: profiles.get(k.sessionId)?.businessName, gstin: maskId(profiles.get(k.sessionId)?.gstin), createdAt: k.createdAt, findings: k.result.findings.filter((f) => f.severity !== "info").map((f) => explainFinding(f, "en")) })));
 });
 app.get("/backoffice/kyc/:id/documents", async (c) => {
